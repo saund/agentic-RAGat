@@ -19,8 +19,7 @@ from pinecone import Pinecone, ServerlessSpec
 
 gl_github_token = os.getenv('GITHUB_TOKEN')
 gl_pinecone_api_token = os.getenv('PINECONE_API_TOKEN')
-
-
+gl_top_k = 10
 
 
 def load_docs_from_repo(repo_url, repo_owner):
@@ -44,14 +43,21 @@ def load_docs_from_repo(repo_url, repo_owner):
         ),
     )
     documents = reader.load_data(branch="master")
-    return docuemnts
+    return documents
 
 
 
 gl_embeddings = OpenAIEmbeddings()
 
-gl_pinecone_index_name = "langchain-test-index-mohit"  # change if desired
+gl_pinecone_index_name = "langchain-test-index-mohit-2"  # change if desired
 
+
+def baseline_rag_on_query(query_text):
+    global gl_top_k
+    retrieval_results = fetch_context_from_vdb_for_text(query_text, top_k = gl_top_k)
+    llm_result = call_llm_for_rag_answer(query_text, retrieval_results)
+    result_content = llm_result.content
+    return result_content
 
 
 def fetch_context_from_vdb_for_text(query_text, top_k = 10):
@@ -59,7 +65,7 @@ def fetch_context_from_vdb_for_text(query_text, top_k = 10):
     #existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
     
     index = pc.Index(gl_pinecone_index_name)
-    print(f"index: {index}")
+    #print(f"index: {index}")
 
     vector_store = PineconeVectorStore(index=index,
                                        embedding=gl_embeddings)
@@ -149,3 +155,8 @@ def format_prompt_wrong(query, retrieval_results):
     context = "\n".join(retrieval_context_list)  # Join the context list into a single string
     prompt = f"Query: {query}\nContext:\n{context}"
     return prompt
+
+
+if __name__ == "__main__":
+    result = baseline_rag_on_query("How do I use this microcontroller? is it 18 volts?")
+    print(result)
