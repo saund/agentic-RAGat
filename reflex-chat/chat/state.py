@@ -2,6 +2,7 @@ import os
 import reflex as rx
 from openai import OpenAI
 from chat.CorrectiveRAGWorkflow import CorrectiveRAGWorkflow
+from chat.BaselineRAGWorkflow import BaselineRAGWorkflow
 import chat.baseline_rag as baseline_rag
 
 
@@ -119,7 +120,8 @@ class State(rx.State):
         yield
 
         try:
-            answer_text = baseline_rag.baseline_rag_on_query(question)
+            wf = BaselineRAGWorkflow(timeout=60.0, verbose=False)
+            answer_text = await wf.run(query=question)
             # Ensure answer_text is not None before concatenation
             if answer_text is not None:
                 self.chats[self.current_chat][-1].answer += answer_text
