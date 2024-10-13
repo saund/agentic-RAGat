@@ -2,6 +2,7 @@ import os
 import reflex as rx
 from openai import OpenAI
 from chat.CorrectiveRAGWorkflow import CorrectiveRAGWorkflow
+import chat.baseline_rag as baseline_rag
 
 
 # Checking if the API key is set properly
@@ -80,20 +81,57 @@ class State(rx.State):
         if question == "":
             return
 
-        result = self.agent_process_question(question)
-
-        async for value in result:
-            yield value
-        '''
+        ''' # old way using openai
         model = self.openai_process_question
 
         async for value in model(question):
             yield value
         '''
+        
+        if(self.agent_enabled):
+            print('Agentic RAG')
+            result = self.agent_process_question(question)
+        else:
+            print('Baseline RAG')
+            result = self.baseline_process_question(question)
+
+        async for value in result:
+            yield value
+        
+        '''
+        result = self.agent_process_question(question)
+        async for value in result:
+           yield value
+        '''
 
     async def set_agent_enabled(self, enabled: bool):
         """Set the agent enabled state."""
         self.agent_enabled = enabled
+
+    async def baseline_process_question(self, question: str):
+        """Process the question with the agent."""
+        # Add the question to the list of questions.
+        qa = QA(question=question, answer="")
+        self.chats[self.current_chat].append(qa)
+
+        # Clear the input and start the processing.
+        self.processing = True
+        yield
+
+        try:
+            answer_text = baseline_rag.baseline_rag_on_query(question)
+            # Ensure answer_text is not None before concatenation
+            if answer_text is not None:
+                self.chats[self.current_chat][-1].answer += answer_text
+            else:
+                # Handle the case where answer_text is None, perhaps log it or assign a default value
+                # For example, assigning an empty string if answer_text is None
+                answer_text = ""
+                self.chats[self.current_chat][-1].answer += answer_text
+            self.chats = self.chats
+            yield
+        finally:
+            self.processing = False
 
     async def agent_process_question(self, question: str):
         """Process the question with the agent."""
@@ -106,7 +144,7 @@ class State(rx.State):
         yield
 
         try:
-            wf = CorrectiveRAGWorkflow(verbose=False)
+            wf = CorrectiveRAGWorkflow(timeout=60.0, verbose=False)
             answer_text = await wf.run(query=question)
             # Ensure answer_text is not None before concatenation
             if answer_text is not None:

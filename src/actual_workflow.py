@@ -33,7 +33,7 @@ from langchain.prompts import PromptTemplate
 from llama_index.core.query_pipeline import QueryPipeline
 from llama_index.core.base.base_retriever import BaseRetriever
 
-from sklearn.metrics.pairwise import cosine_similarity
+# from sklearn.metrics.pairwise import cosine_similarity
 
 from llama_parse import LlamaParse
 from llama_index.core import SimpleDirectoryReader
@@ -89,6 +89,9 @@ class RelevanceEvalEvent(Event):
 
     relevant_results: list[str]
 
+class RefineOnRepoEvent(Event):
+    """Once decided on repo level refinement it comes here."""
+
 class LinkParseEvent(Event):
     """Parse the Links, create index and search."""
 
@@ -99,6 +102,15 @@ class QueryEvent(Event):
 
     relevant_text: str
     search_text: str
+
+class RefinementEvent(Event):
+    """ Refines Scratchpad to add or filter out relevant context"""
+    pass
+
+class RefineOnFolderEvent(Event):
+    """ find folder and retrive full documents"""
+    pass
+
 
 class CorrectiveRAGWorkflow(Workflow):
 
@@ -219,7 +231,7 @@ class CorrectiveRAGWorkflow(Workflow):
     async def retrieve(
         self, ctx: Context, ev: PrepEvent
     ) -> RetrieveEvent | None:
-        """Retrieve the relevant nodes for the query."""
+        """Retrieve the relevant chunks for the query."""
         query = await ctx.get("query")
         count = await ctx.get("count", default=0)
         chunk_stack = await ctx.get("chunk_stack",default=[])
@@ -229,7 +241,6 @@ class CorrectiveRAGWorkflow(Workflow):
         print(f'chunk_stack - {chunk_stack}')
         print(f'filter_for_rag - {filter_for_rag}')
 
-        # retriever_kwargs = await ctx.get("retriever_kwargs")
         index = await ctx.get("index", default=None)
         print(f'index - {index}')
         if not index:
@@ -250,14 +261,20 @@ class CorrectiveRAGWorkflow(Workflow):
         chunk_stack.append(result)
         await ctx.set("chunk_stack", chunk_stack)
 
-        print('chhhhhhhh')
+        stage = await ctx.get("stage",'')
+        print(stage)
+        # print(stage=='')
+        if stage != '' and stage !='repo':
+            print('came in to stop')
+            return StopEvent()
+        
 
         return RetrieveEvent(retrieved_result=result)
     
     @step
     async def eval_relevance(
         self, ctx: Context, ev: RetrieveEvent
-    ) -> LinkParseEvent | PrepEvent | StopEvent:
+    ) -> LinkParseEvent | PrepEvent | RefinementEvent | StopEvent:
         """Evaluate relevancy of retrieved documents with the query."""
 
         print('chhc')
@@ -297,7 +314,8 @@ class CorrectiveRAGWorkflow(Workflow):
 
         if float(result_list[0]) >= 0.7:
             return StopEvent(result=result_list[1])
-        
+        else:
+            return RefinementEvent()
         if count == 1:
             print(" Not Satisfied..Retrying RAG on a Repository level")
             # find the best repo to search
@@ -362,6 +380,72 @@ class CorrectiveRAGWorkflow(Workflow):
         return StopEvent(result=result_list[1])
     
     @step
+    async def refine_seratchpad(self, ctx: Context, ev: RefinementEvent) -> RefineOnRepoEvent | RefineOnFolderEvent | StopEvent:
+
+        scratchpad = await ctx.get("scratchpad")
+        stage = await ctx.get("stage",'')
+
+        if stage == '':
+            return RefineOnRepoEvent()
+        elif stage == 'repo':
+            return RefineOnFolderEvent()
+        elif stage == 'folder':
+            print('successfully came here')
+        else:
+            return StopEvent
+        
+    @step
+    async def repo_refining(self, ctx: Context, ev: RefineOnRepoEvent) -> PrepEvent | StopEvent:
+
+        scratchpad = await ctx.get("scratchpad")
+
+        repo_occurences = Counter([doc.metadata['repo'] for doc in scratchpad])
+        print(f'repo_occurences - {repo_occurences}')
+        repo_count = repo_occurences.most_common()
+        print(repo_count)
+        await ctx.set("repo_count",repo_count) # would need if highest ocuring repo search gives significantly worse results
+        print(f'repo count - {repo_count}')
+        filter_for_rag = {"repo": repo_count[0][0]}
+        await ctx.set("filter_for_rag", filter_for_rag)
+        print(f'filter_for_rag is set as {filter_for_rag}')
+
+        await ctx.set("stage", 'repo')
+
+        return PrepEvent()
+
+        return StopEvent(result='hi')
+    
+    @step
+    async def folder_refining(self, ctx: Context, ev: RefineOnFolderEvent) -> StopEvent:
+        print('came inside folder')
+        scratchpad = await ctx.get("scratchpad")
+
+        folders_or_files_to_pull = []
+
+        for docs in scratchpad:
+            folders_or_files_to_pull.append(docs.metadata['url'])
+
+        
+
+        raw_links = list(set([link.replace("https://github","https://raw.githubusercontent").replace("blob","refs/heads") for link in folders_or_files_to_pull]))
+        print(f"raw links - {raw_links}")
+        content = []
+        for i in raw_links:
+
+            response = requests.get(i)
+            if response.status_code == 200:
+                content.append(Document(page_content=response.text))
+            else:
+                print(f"Failed to retrieve {i}, status code: {response.status_code}")
+
+        await ctx.set("stage", "folder")
+        print(content)
+        await ctx.set("scratchpad", content)
+        # await ctx.set("",)
+
+        return RetrieveEvent(retrieved_result=content)
+    
+    @step
     async def parse_links(
         self, ctx: Context, ev: LinkParseEvent
     ) -> StopEvent:
@@ -391,7 +475,16 @@ if __name__ == "__main__":
 
     index = pc.Index(index_name)
 
-    query = "how to use Auxiliary flash. mean how to read or write api's..? is there a limitation on write cycle..? is this can be used for event log ..? is can we have file system like fat16,fat32, etc ..? can i get the sample code example."
+    query = """
+    Group: Home/Forums/WirelessConnectivity/AIROC Bluetooth
+Topic: cybt-213043-02 not entering sleep mode
+Hi,
+I am using cybt-213043-02 eval board. I am running https://github.com/Infineon/mtb-example-btsdk-low-power-20819 example with a tweak that changes the eval board to cybt-213043-eval.
+I can see the output on the PUART when I press the user button and the ble works ok.
+However the board never enters sleep mode. I see a constant ~2.5mA usage and the sleep permit handler is never called. Also sleep callback is never called.
+The HOST_WAKE and DEV_WAKE pins are floating. I have tried tying them to either VCC or GND without effect. Is there some additional configuration or hw requirement to trigger sleep mode.
+Thank you for response.
+    """
     # query = 'Does the repository discuss about the ModusToolbox?'
     import asyncio
     result = asyncio.run(execute_loop(query, index))
