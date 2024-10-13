@@ -1,0 +1,363 @@
+
+
+
+--------------------------------------
+Example 1
+
+Question URL:
+https://community.infineon.com/t5/PSoC-6/Psoc-6-CYBLE-416045-02-Auxiliary-flash/td-p/341155
+
+Community Forum Developer question:
+Group: Home/Forums/Microcontrollers/PSoC6/
+Topic: Psoc 6(CYBLE-416045-02) Auxiliary flash
+
+how to use Auxiliary flash. mean how to read or write api's..?
+
+is there a limitation on write cycle..?
+
+is this can be used for event log ..? 
+
+is can we have file system like fat16,fat32, etc ..?
+
+can i get the sample code example.
+
+---
+17 replies
+
+First reply (moderator) refers to code example:
+PSoC™ 6 MCU: emFile filesystem
+https://github.com/Infineon/mtb-example-psoc6-filesystem-emfile-freertos/blob/master/README.md
+
+A later reply refers to code example:
+https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__flash.html
+then
+"The GitHub repo for this code example : https://github.com/Infineon/mtb-example-psoc6-emulated-eeprom"
+https://github.com/Infineon/mtb-example-psoc6-emulated-eeprom
+
+
+--------------------------------------
+Example 2
+
+Question URL:
+https://community.infineon.com/t5/ModusToolbox/Secure-OTA-Firmware-Upgrade-Application-Versioning/td-p/333470
+
+Community Forum Developer question:
+Group: Home/Forums/Software/ModusToolbox
+Topic: Secure OTA Firmware Upgrade - Application Versioning
+
+Hi!
+
+Thank you in advance.
+
+I am trying to implement the application versioning info to my device ( AIROC CYW20719B2 chip).
+
+Following the cypress doc for SOTA FW UPGRADE.
+Secure Over-the-Air Firmware Upgrade (cypress.com)
+as mentioned in section 6.1 for application versioning.
+
+Couldn't store or update the app info,
+1. Receiving compilation error when adding the piece of code as per doc sec6.1
+
+error: unknown type name 'PLACE_IN_APP_ID_AREA'
+   51 | PLACE_IN_APP_ID_AREA wiced_bt_application_id_t mighty_vibe_app_id =
+      | ^~~~~~~~~~~~~~~~~~~~
+Kindly provide me solution to fix this.
+
+2. what and where exactly it means  PLACE_IN_APP_ID_AREA as per doc sec 6.1 ?
+3. I used sdk api (wiced_firmware_upgrade_store_to_nv) to manually store 
+the app info in nv address location.
+4. Also I didn't find any handle/API that provides my application the Active DS address location to store the App info.
+
+Need a fix asap to complete SOTA FW UPGRADE with app versioning information.
+
+Thank you.
+
+---
+
+Moderator reply says the asker is referring to an older version of the documentation,
+provides link to this documentation in the github repo, which is a pdf guide, not code.
+https://github.com/Infineon/btsdk-docs/blob/master/docs/BT-SDK/AIROC-Secure-Over-the-Air-Firmware-Upgrade.pdf
+
+
+--------------------------------------
+Example 3
+
+Question URL:
+https://community.infineon.com/t5/PSoC-6/TRNG-example/td-p/656620#.
+
+Community Forum Developer question:
+Group: Home/Forums/Microcontrollers/PSoC6/
+Topic: TRNG example
+
+I'm trying to get TRNG working in the CE221295 example:
+https://github.com/Infineon/PSoC-6-MCU-System-Level-Designs/tree/master/CE221295%20-%20PSoC%206%20MC...
+
+but it's looking for cy_crypto_config.h which doesn't exist anywhere. 
+
+---
+
+Answer is that the user is trying to use the wrong software example for the SDK they are using.
+
+
+
+
+--------------------------------------
+Example 4
+
+Question URL:
+https://community.infineon.com/t5/PSoC-6/PSOC6-Cy-BLE-GetWhiteList/td-p/366691
+
+Community Forum Developer question:
+Group: Home/Forums/Microcontrollers/PSoC6/
+Topic: PSOC6 Cy_BLE_GetWhiteList
+
+Has anyone had any success using Cy_BLE_GetWhiteList(), or know of an example?
+
+Every permutation of input parameter I try results in a CY_BLE_ERROR_INVALID_OPERATION response.  Any guidance would be appreciated.
+
+---
+
+Moderator provides a link to the API documentation.
+
+https://infineon.github.io/bless/ble_api_reference_manual/html/group__group__ble__common___whitelist__api__functions.html#ga4fea1efaf71f4490a00a8f88eb3297bd
+
+--------------------------------------
+Example 5
+
+Question URL:
+https://community.infineon.com/t5/AIROC-Bluetooth/cybt-213043-02-not-entering-sleep-mode/td-p/643512
+
+Community Forum Developer question:
+Group: Home/Forums/WirelessConnectivity/AIROC Bluetooth
+Topic: cybt-213043-02 not entering sleep mode
+
+Hi,
+
+I am using cybt-213043-02 eval board. I am running https://github.com/Infineon/mtb-example-btsdk-low-power-20819 example with a tweak that changes the eval board to cybt-213043-eval.
+
+I can see the output on the PUART when I press the user button and the ble works ok.
+
+However the board never enters sleep mode. I see a constant ~2.5mA usage and the sleep permit handler is never called. Also sleep callback is never called.
+
+The HOST_WAKE and DEV_WAKE pins are floating. I have tried tying them to either VCC or GND without effect. Is there some additional configuration or hw requirement to trigger sleep mode.
+
+Thank you for response.
+
+---
+12 replies
+
+-Another poster refers to this github repo:
+ https://github.com/Infineon/mtb-example-btsdk-low-power-20819
+-Moderator highlights a screenshot of some documentation
+-Moderator provides a more detailed technical explanation in reference to this pdf documentation:
+"CYW20819/CYW20820 feature and peripheral guide"
+https://www.infineon.com/dgdl/Infineon-AN226546_CYW20819_Feature_and_Peripheral_Guide-ApplicationNotes-v04_00-EN.pdf?fileId=8ac78c8c7cdc391c017d0d367ac666a5
+
+---
+Moderator answer:
+
+Hi @zrelieskim,
+The issue with CYBT-213043-02 not entering sleep mode is a known issue which is being taken care of internally. It will be fixed in the upcoming release.
+
+For time being, please downgrade the 20819A1 LowPower Library using the library manager from 4.4.2 release to 4.2.1. This will fix the problem.
+
+As far as your query on DEV_WAKE pin is concerned, DEV_WAKE and HOST_WAKE pins are Arm® GPIOs available in CYW20819. They are different as compared to other available LHL GPIOs.
+
+Arm® GPIOs can operate only in active mode and they do not support muxable peripherals. They do not operate in Sleep mode.
+
+This is the reason why you have not been able to wake up the device from sleep state using the DEV_WAKE.
+
+You may refer this document on CYW20819/CYW20820 feature and peripheral guide for better clarity.
+
+I request you to change your GPIO pin requirement.
+
+Thank you.
+
+Regards,
+Sanketh B Prabhu
+
+
+---
+
+The repo is
+https://github.com/Infineon/mtb-example-btsdk-low-power-20819
+
+
+
+Analysis:
+
+The file in the repo,
+https://github.com/Infineon/mtb-example-btsdk-low-power-20819/blob/master/low_power_20819.c
+
+contains enough info that when provided as context for an LLM call, the LLM produces
+an answer that mentions DEV_WAKE and HOST_WAKE pins on GPIOs.
+The answer does not specifically mention that Arm® GPIOs can operate only in active mode and they do not support muxable peripherals. They do not operate in Sleep mode.
+
+
+The pdf doc:
+Infineon-AN226546_CYW20819_Feature_and_Peripheral_Guide-ApplicationNotes-v04_00-EN.pdf
+
+has on Page 6:
+
+Arm® GPIOs can operate only in active mode and they do not support muxable peripherals. DEV_WAKE,
+HOST_WAKE, and four BT_GPIOs are the Arm GPIOs available in the CYW20819A1KFB1G package, whereas
+DEV_WAKE and HOST_WAKE are the Arm GPIOs available in the CYW20819A1KFBG package. The DEV_WAKE
+can be used to wake the Bluetooth® device with a signal from the host. The HOST_WAKE signal can be used
+to wake the host device with a signal from the Bluetooth® device. BT_GPIOs can be configured as a GCI
+(Global Co-existence Interface) pin.
+
+The repo's 
+
+
+
+--------------------------------------
+Example 6
+
+Question URL:
+https://community.infineon.com/t5/ModusToolbox/Multi-Counter-Watch-Dog-Timer/td-p/224428
+
+---
+Community Forum Developer question:
+Group: Home/Forums/Software/ModusToolbox
+Topic: Multi Counter Watch Dog Timer
+
+Hello,
+
+I'm trying to use the MCWDT as an interrupt source to wake my device from deep sleep every 30 minutes. The problem I have is I actually don't know how to configure it or even how the coding flow works for it. I've been looking around for an example of it but the only thing I can find it where it is used as a free running counter. Anyone here can tell me how to actually do it in modus toolbox?
+
+---
+
+Moderator provides link to code example:
+https://github.com/Infineon/Code-Examples-for-the-ModusToolbox-PSoC-6-SDK/tree/mt1.1/CE220498_PSoC6_MCWDT
+
+
+--------------------------------------
+Example 7
+
+Question URL:
+https://community.infineon.com/t5/3D-Hall-Magnetic-sensor/Can-any-one-share-the-calculation-process-of-atan2-atan-of-hall-sensor-design/td-p/360825
+
+---
+Community Forum Developer question:
+Group: Home/Forums/Sensors/3D Hall (Magnetic sensor)
+Topic: Can any one share the calculation process of atan2, atan of hall sensor design
+
+Hello,
+
+I am using website tool of magnetic design tool to design a speed measurement system using 3D hall sensors.
+
+I make one simulation based on the website tool.
+
+I get result, like Bx, Bz, distance, error. ..
+
+When  i go to detail calculation process, using Bx, Bz, Atan(Bx/Bz according to application notes), while i can't get same result as showed by website tool.
+
+Any one can make an explanation of the website calculation process ?
+
+Another point, we want to make DOE analysis, if the hall sensor has some mis-alignment, or mis-orentation. So, we need to do a lot of calculation loops, in this way the website calculation is not convenient.
+
+Is ti possible to share us formula, how you calculate Bx, By, Bz from permanent in your website tool, so we can make DOE calculation in excel, or in your other tools.
+
+For website tool, it is impossible to do DOE, or parameter sensitive analysis, you need to input parameter one by one, and record result, it is very time consuming.
+
+Thanks.
+
+---
+
+Moderator replies with a link to code examples on github
+https://github.com/Infineon/TLE493D-3DMagnetic-Sensor/tree/master/examples
+
+
+--------------------------------------
+Example 8
+
+Question URL:
+https://community.infineon.com/t5/PSoC-4/Prevent-automatic-re-connection-with-a-bonded-device/td-p/201500
+
+Community Forum Developer question:
+Group: Home/Forums/Microcontrollers/PSoC6 4 MCU
+Topic: Prevent automatic re-connection with a bonded device
+
+I am using a CYBLE-022001-00 chip, and I have made use of the bonding feature of the BLE so that I will only pair with a device once. I am well aware that enabling bonding means that automatic reconnection is inevitable.
+
+Is there a way to bond with a SELECTED bonded device and prevent re-connection with a "not-selected" bonded device? thanks.
+
+---
+
+Another user posts links to documentation and code:
+https://github.com/Infineon/PSoC-4-BLE/tree/master/100_Projects_in_100_Days/Day014_Whitelist
+Moderator weights in with a technical explanation
+
+
+--------------------------------------
+Example 9
+
+Question URL:
+https://community.infineon.com/t5/USB-EZ-PD-Type-C/CY7113-firmware-source-code/td-p/378972
+
+Community Forum Developer question:
+Group: Home/Forums/USB/USB EZ-PD Type-C
+Topic: CY7113 firmware source code
+
+Hi,all
+
+ 
+
+Recently, we are doing the software development of USB PD 140W related verification.I saw this document linked below.
+
+CY7113 EZ-PD™ PMG1-S3 MCU prototyping kit release notes (infineon.com)
+
+Could you please provide this firmware and its source code?
+
+[screen shot here, referring to "This firmware..."]
+
+Jiong_1-1667013454216.png
+
+Thanks & Regards
+
+Jiong
+
+---
+
+Moderator provides link to code on github:
+https://github.com/Infineon/mtb-example-pmg1-usbpd-sink-capsense
+
+
+--------------------------------------
+Example 10
+
+Question URL:
+https://community.infineon.com/t5/XMC/Multiple-CAN-BUS-Abstraction-Layer-Strategies-XMC7000-Series/td-p/616543
+
+Community Forum Developer question:
+Group: Home/Forums/Microcontrollers/Multiple CAN BUS
+Topic: Multiple CAN BUS / Abstraction Layer Strategies XMC7000 Series
+
+Hello all!
+
+I am working on a project with an XMC7100 series MCU.
+
+My project is making use of multiple CAN busses and I am trying to figure out the best way to encapsulate each CAN bus code into a resuable module so I can write a common set of functions to do things like initialization, send and received messages.
+
+However, the CAN bus example found here and the autogenerated code from Modustoolbox both rely on a lot of globally named variables which make it challenging to figure out how to move into an abstraction layer. Ideally I would like to put each CAN bus into a CAN bus class in C++, though happy to use functions / structs in C as long as they are written in a resuable fashion.
+
+Has anyone else attempted this and/or does the Infineon team have any advice or samples I could start from?
+
+[This question has a link to github source code for the device
+https://github.com/Infineon/mtb-example-pdl-xmc7000-canfd/blob/master/main.c ]
+
+---
+
+Moderator reponse says "As of now we don't have any examples to show."
+
+How does the moderator know this?  Did they spend a lot of time looking?
+Did they know how the code and examples are organized, so they know the right place to look?
+How can an AI assisted repo search and indexing solution know to return a negative example,
+that the document someone is looking for does not exist?
+
+
+
+
+
+
+
