@@ -33,7 +33,7 @@ from langchain.prompts import PromptTemplate
 from llama_index.core.query_pipeline import QueryPipeline
 from llama_index.core.base.base_retriever import BaseRetriever
 
-from sklearn.metrics.pairwise import cosine_similarity
+#from sklearn.metrics.pairwise import cosine_similarity
 
 from llama_parse import LlamaParse
 from llama_index.core import SimpleDirectoryReader
@@ -356,7 +356,7 @@ class CorrectiveRAGWorkflow(Workflow):
                     link_list += links
             top_5_links = self.best_5_links(link_list, query)
             print(f'Top 5 - {top_5_links}')
-            return LinkParseEvent(links=top_5_links)
+            #return LinkParseEvent(links=top_5_links)
             return StopEvent(result=result_list[1])
             
         return StopEvent(result=result_list[1])
@@ -379,7 +379,10 @@ async def execute_loop(query, index):
     result = await wf.run(query=query, index=index)
     return result
 
-if __name__ == "__main__":
+
+
+
+def main():
 
     pinecone_key = os.getenv("PINECONE_API_KEY")
     
@@ -396,3 +399,9 @@ if __name__ == "__main__":
     import asyncio
     result = asyncio.run(execute_loop(query, index))
     print(result)
+
+    
+
+if __name__ == "__main__":
+    main()
+    
