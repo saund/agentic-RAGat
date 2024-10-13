@@ -215,8 +215,6 @@ def call_llm_for_rag_answer_from_refined_context(query, str_context):
 
 def agentic_refine_retrieval_context(query_text, retrieval_results):
 
-
-    loop = None
     try:
         # Get the current event loop
         loop = asyncio.get_running_loop()
